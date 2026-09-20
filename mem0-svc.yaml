@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mem0
+  labels:
+    app: mem0
+spec:
+  type: ClusterIP
+  selector:
+    app: mem0
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http

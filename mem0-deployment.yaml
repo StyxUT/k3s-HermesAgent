@@ -1,0 +1,86 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mem0
+  labels:
+    app: mem0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mem0
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mem0
+    spec:
+      containers:
+        - name: mem0
+          image: mem0-api-server:amd64
+          imagePullPolicy: Never
+          command:
+            - sh
+            - -c
+            - pip install --no-cache-dir --quiet 'psycopg[binary]' && alembic upgrade head && exec uvicorn main:app --host 0.0.0.0 --port 8000
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: POSTGRES_HOST
+              value: postgres-service
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: postgres
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-password
+                  key: POSTGRES_PASSWORD
+            - name: APP_DB_NAME
+              value: mem0_app
+            - name: ADMIN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-agent-secret
+                  key: MEM0_API_KEY
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hermes-agent-secret
+                  key: JWT_SECRET
+            - name: OPENAI_API_KEY
+              value: ollama
+            - name: OPENAI_BASE_URL
+              value: http://192.168.0.13:11434/v1
+            - name: MEM0_DEFAULT_LLM_MODEL
+              value: smollm2:1.7b
+            - name: MEM0_DEFAULT_EMBEDDER_MODEL
+              value: qwen3-embedding
+            - name: MEM0_TELEMETRY
+              value: "false"
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: mem0-history
+              mountPath: /app/history
+      volumes:
+        - name: mem0-history
+          emptyDir: {}
+      nodeName: k3s-worker-03

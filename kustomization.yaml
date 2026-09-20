@@ -1,0 +1,25 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - hermes-agent-config.yaml
+  - hermes-agent-deployment.yaml
+  - hermes-agent-svc.yaml
+  - mem0-db-init-job.yaml
+  - mem0-deployment.yaml
+  - mem0-svc.yaml
+secretGenerator:
+  - name: hermes-agent-secret
+    files:
+      - TELEGRAM_BOT_TOKEN=./secrets/telegram_bot_token.txt
+      - TELEGRAM_ALLOWED_USERS=./secrets/telegram_allowed_users.txt
+      - OPENCODE_GO_API_KEY=./secrets/opencode_go_api_key.txt
+      - API_SERVER_KEY=./secrets/api_server_key.txt
+      - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=./secrets/dashboard_username.txt
+      - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=./secrets/dashboard_password.txt
+      - HERMES_DASHBOARD_BASIC_AUTH_SECRET=./secrets/dashboard_auth_secret.txt
+      - OPENBRAIN_MCP_KEY=./secrets/openbrain_mcp_key.txt
+      - MEM0_API_KEY=./secrets/mem0_api_key.txt
+      - JWT_SECRET=./secrets/mem0_jwt_secret.txt
+generatorOptions:
+  disableNameSuffixHash: true

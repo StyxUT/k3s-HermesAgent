@@ -1,0 +1,39 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mem0-db-init
+  labels:
+    app: mem0
+spec:
+  backoffLimit: 6
+  template:
+    metadata:
+      labels:
+        app: mem0-db-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: psql
+          image: pgvector/pgvector:pg18
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-service -p 5432 -U postgres; do
+                sleep 2
+              done
+              PGPASSWORD="$POSTGRES_PASSWORD" psql \
+                -h postgres-service -U postgres -d postgres \
+                -v ON_ERROR_STOP=1 \
+                -c "SELECT 1 FROM pg_database WHERE datname = 'mem0_app'" | grep -q 1 || \
+              PGPASSWORD="$POSTGRES_PASSWORD" psql \
+                -h postgres-service -U postgres -d postgres \
+                -v ON_ERROR_STOP=1 \
+                -c 'CREATE DATABASE mem0_app'
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-password
+                  key: POSTGRES_PASSWORD

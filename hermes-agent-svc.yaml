@@ -1,0 +1,22 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hermes-agent
+spec:
+  type: NodePort
+  selector:
+    app: hermes-agent
+  ports:
+    - name: api
+      port: 8642
+      targetPort: api
+    - name: dashboard
+      port: 9119
+      targetPort: dashboard
+  externalIPs:
+    - 192.168.0.211
+    - 192.168.0.221
+    - 192.168.0.222
+    - 192.168.0.223
+    - 192.168.0.224

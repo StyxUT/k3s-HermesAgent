@@ -1,0 +1,122 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hermes-agent-config
+data:
+  config.yaml: |
+    model:
+      provider: custom:llamacpp
+      default: /opt/models/Qwen3.8-27B-Q4_K_M.gguf
+      context_length: 100000 
+
+    agent:
+      gateway_timeout: 7200
+
+    memory:
+      provider: mem0
+
+    custom_providers:
+       - name: llamacpp
+          base_url: https://ai.styxut.net/v1
+          api_mode: chat_completions
+          stale_timeout_seconds: 7200 
+
+    model_aliases:
+      local:
+        provider: custom:llamacpp
+        model: /opt/models/Qwen3.8-27B-Q4_K_M.gguf
+      opencode-go:
+        provider: opencode-go
+        model: deepseek-v4-flash
+      openai-oauth:
+        provider: openai-codex
+        model: gpt-5.6-luna
+
+    mcp_servers:
+      openbrain:
+        url: http://openbrain:8000
+        headers:
+          x-brain-key: ${OPENBRAIN_MCP_KEY}
+
+    tool_loop_guardrails:
+      hard_stop_enabled: true
+      hard_stop_after:
+        exact_failure: 5
+        idempotent_no_progress: 5
+
+    web:
+      backend: firecrawl
+      use_gateway: false
+
+    platform_toolsets:
+      cli:
+        - web
+        - browser
+        - terminal
+        - file
+        - code_execution
+        - skills
+        - todo
+        - memory
+        - session_search
+        - clarify
+        - delegation
+        - cronjob
+      telegram:
+        - web
+        - browser
+        - terminal
+        - file
+        - code_execution
+        - skills
+        - todo
+        - memory
+        - session_search
+        - clarify
+        - delegation
+        - cronjob
+
+    # Notes:
+    # - Hermes reads provider credentials from env vars or /opt/data/.env.
+    # - Firecrawl is provided by the in-cluster service at FIRECRAWL_API_URL.
+    # - OpenCode Go uses OPENCODE_GO_API_KEY.
+    # - OpenAI OAuth is not configured here; it is a one-time interactive login
+    #   that persists to /opt/data/auth.json on the PVC.
+  mem0.json: |
+    {
+      "mode": "oss",
+      "user_id": "hermes-user",
+      "agent_id": "hermes",
+      "rerank": false,
+      "oss": {
+        "llm": {
+          "provider": "ollama",
+          "config": {
+            "model": "smollm2:1.7b",
+            "ollama_base_url": "http://192.168.0.13:11434"
+          }
+        },
+        "embedder": {
+          "provider": "ollama",
+          "config": {
+            "model": "qwen3-embedding",
+            "ollama_base_url": "http://192.168.0.13:11434",
+            "embedding_dims": 4096
+          }
+        },
+        "vector_store": {
+          "provider": "pgvector",
+          "config": {
+            "dbname": "postgres",
+            "collection_name": "mem0",
+            "embedding_model_dims": 4096,
+            "user": "postgres",
+            "password": "__POSTGRES_PASSWORD__",
+            "host": "postgres-service",
+            "port": 5432,
+            "hnsw": false
+          }
+        }
+      }
+    }

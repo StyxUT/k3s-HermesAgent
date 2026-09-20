@@ -1,0 +1,29 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mem0-image-import
+spec:
+  nodeName: k3s-worker-03
+  restartPolicy: Never
+  containers:
+    - name: importer
+      image: busybox:1.36
+      command: ["sh", "-c", "sleep 3600"]
+      securityContext:
+        privileged: true
+      volumeMounts:
+        - name: containerd-socket
+          mountPath: /run/k3s/containerd/containerd.sock
+        - name: k3s-binary
+          mountPath: /usr/local/bin/k3s
+          readOnly: true
+  volumes:
+    - name: containerd-socket
+      hostPath:
+        path: /run/k3s/containerd/containerd.sock
+        type: Socket
+    - name: k3s-binary
+      hostPath:
+        path: /usr/local/bin/k3s
+        type: File
