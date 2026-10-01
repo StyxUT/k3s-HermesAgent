@@ -14,6 +14,7 @@ secretGenerator:
       - TELEGRAM_BOT_TOKEN=./secrets/telegram_bot_token.txt
       - TELEGRAM_ALLOWED_USERS=./secrets/telegram_allowed_users.txt
       - OPENCODE_GO_API_KEY=./secrets/opencode_go_api_key.txt
+      - GH_TOKEN=./secrets/github_token.txt
       - API_SERVER_KEY=./secrets/api_server_key.txt
       - HERMES_DASHBOARD_BASIC_AUTH_USERNAME=./secrets/dashboard_username.txt
       - HERMES_DASHBOARD_BASIC_AUTH_PASSWORD=./secrets/dashboard_password.txt
