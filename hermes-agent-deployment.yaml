@@ -17,6 +17,13 @@ spec:
       labels:
         app: hermes-agent
     spec:
+      nodeSelector:
+        egress.network/internet: "true"
+      tolerations:
+        - key: dedicated
+          operator: Equal
+          value: internet-egress
+          effect: NoSchedule
       terminationGracePeriodSeconds: 90
       initContainers:
         - name: seed-hermes-config
@@ -79,6 +86,8 @@ spec:
               value: 0.0.0.0
             - name: HERMES_GATEWAY_ADAPTER_DISCONNECT_TIMEOUT
               value: "30"
+            - name: HASS_URL
+              value: http://homeassistant:8123
             # cua-driver enables anonymous PostHog telemetry by default.
             # Keep it disabled even when the persistent Hermes config predates
             # the computer_use.cua_telemetry setting.

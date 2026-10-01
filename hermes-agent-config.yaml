@@ -16,6 +16,22 @@ data:
     memory:
       provider: mem0
 
+    stt:
+      enabled: true
+      provider: ai_whisper
+      language: en
+      providers:
+        ai_whisper:
+          type: command
+          command: >-
+            curl -fsS -X POST -F file=@{input_path}
+            -F language={language}
+            http://192.168.40.10:8090/transcribe |
+            python -c 'import json,sys; print(json.load(sys.stdin).get("text",""))'
+          timeout: 180
+          format: txt
+          model: base
+
     custom_providers:
        - name: llamacpp
           base_url: https://ai.styxut.net/v1
